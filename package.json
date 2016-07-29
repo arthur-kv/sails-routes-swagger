@@ -17,6 +17,7 @@
     },
     "homepage": "https://github.com/arthur-kv/sails-routes-swagger#readme",
     "sails": {
-        "isHook": true
+        "isHook": true,
+        "hookName": "swagger"
     }
 }

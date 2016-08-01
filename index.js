@@ -9,9 +9,11 @@ const
 	DEFAULT_HOST 			= 'localhost:8080';
 
 module.exports = function sailsRoutesSwagger (sails) {
+	let configKey;
 
     return {
         initialize: function (cb) {
+        	configKey = this.configKey;
             sails.after('router:after', () => {
                 let pathResults = docGen.generateSwaggerPathObjects(sails.config.routes);
 
@@ -44,8 +46,8 @@ module.exports = function sailsRoutesSwagger (sails) {
         },
         routes: {
             after: {
-                'GET /swagger/ui': function (req, res) {
-                    res.status(200).json(sails.hooks[this.configKey]);
+                'GET /swagger/ui': (req, res) => {
+                    res.status(200).json(sails.hooks[configKey]);
                 }
             }
         }

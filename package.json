@@ -22,7 +22,8 @@
   },
   "devDependencies": {
     "mocha": "^2.5.3",
-    "sails": "^0.12.3"
+    "sails": "^0.12.3",
+    "should": "^10.0.0"
   },
   "dependencies": {
     "swagger-parser": "^3.4.1"

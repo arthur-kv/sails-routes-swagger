@@ -1,6 +1,6 @@
 {
   "name": "sails-routes-swagger",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "SailsJS hook to autogenerate swagger docs for custom routes",
   "main": "index.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "url": "git+https://arthur-kv@github.com/arthur-kv/sails-routes-swagger.git"
   },
   "author": "Arthur",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/arthur-kv/sails-routes-swagger/issues"
   },

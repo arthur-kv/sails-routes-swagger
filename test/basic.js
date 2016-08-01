@@ -4,6 +4,7 @@
 const should = require('should');
 
 const Sails = require('sails').Sails;
+const request = require('supertest');
 
 const docGen = require('../lib/doc-generator');
 
@@ -93,6 +94,14 @@ describe('Sails Routes Swagger', function () {
         should.exist(swaggerDoc.securityDefinitions);
         should.exist(swaggerDoc.externalDocs);
         should.exist(swaggerDoc.paths);
+    });
+
+    it('should return swagger json', done => {
+    	request(sails.hooks.http.app)
+	      .get('/swagger/ui')
+	      .set('Accept', 'application/json')
+	      .expect('Content-Type', /json/)
+	      .expect(200, done);
     });
 
     context('Doc Generator', () => {

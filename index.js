@@ -19,7 +19,7 @@ module.exports = function sailsRoutesSwagger (sails) {
 
                 let swaggerJSON = {
                     swagger 		 	: SWAGGER_VER,
-                    info 			 	: docGen.converPackageToSwagger(swaggerConfig.package),
+                    info 			 	: docGen.convertPackageToSwagger(swaggerConfig.package),
                     host 			 	: swaggerConfig.host || DEFAULT_HOST,
                     tags 			 	: docGen.mergeTags(swaggerConfig.tags || [], pathResults.tags),
                     definitions 	 	: swaggerConfig.definitions || {},

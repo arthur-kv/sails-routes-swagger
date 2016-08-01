@@ -1,23 +1,30 @@
 {
-    "name": "sails-routes-swagger",
-    "version": "1.0.0",
-    "description": "SailsJS hook to autogenerate swagger docs for custom routes",
-    "main": "index.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://arthur-kv@github.com/arthur-kv/sails-routes-swagger.git"
-    },
-    "author": "Arthur",
-    "license": "ISC",
-    "bugs": {
-        "url": "https://github.com/arthur-kv/sails-routes-swagger/issues"
-    },
-    "homepage": "https://github.com/arthur-kv/sails-routes-swagger#readme",
-    "sails": {
-        "isHook": true,
-        "hookName": "swagger"
-    }
+  "name": "sails-routes-swagger",
+  "version": "1.0.0",
+  "description": "SailsJS hook to autogenerate swagger docs for custom routes",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -R spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://arthur-kv@github.com/arthur-kv/sails-routes-swagger.git"
+  },
+  "author": "Arthur",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/arthur-kv/sails-routes-swagger/issues"
+  },
+  "homepage": "https://github.com/arthur-kv/sails-routes-swagger#readme",
+  "sails": {
+    "isHook": true,
+    "hookName": "swagger"
+  },
+  "devDependencies": {
+    "mocha": "^2.5.3",
+    "sails": "^0.12.3"
+  },
+  "dependencies": {
+    "swagger-parser": "^3.4.1"
+  }
 }

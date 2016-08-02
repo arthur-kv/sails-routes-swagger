@@ -5,6 +5,8 @@ const should = require('should');
 
 const Sails = require('sails').Sails;
 const request = require('supertest');
+const path = require('path');
+const fs = require('fs-extra');
 
 const docGen = require('../lib/doc-generator');
 
@@ -14,6 +16,7 @@ const customRoutes = {
         action: 'test',
         swagger: {
             tags: [],
+            project: 'Test',
             summary: 'Some Test Summary',
             description: 'Some Test Description',
             operationId: 'addPet',
@@ -38,6 +41,8 @@ const customRoutes = {
     'post /api/test': 'TestController.save'
 }
 
+const outputFolder = path.resolve(__dirname, 'docs');
+
 
 describe('Sails Routes Swagger', function () {
 
@@ -45,7 +50,7 @@ describe('Sails Routes Swagger', function () {
     let sails;
 
     // Before running any tests, attempt to lift Sails
-    before(function (done) {
+    before(function () {
         this.timeout(11000);
 
         let sailsConfig = {
@@ -60,19 +65,40 @@ describe('Sails Routes Swagger', function () {
 		        blueprints  : false
             },
             log: {
-                level: 'error'
+                level: 'verbose'
             },
             routes: customRoutes,
             'sails-routes-swagger': {
-            	package: require('../package'),
-            	externalDocs: { url: 'localhost:3000' }
+            	package 		: require('../package'),
+            	externalDocs 	: { url: 'localhost:3000' },
+            	docsFolder 		: outputFolder,
+            	projects 		: [{ name: 'Test' }]
             }
         };
 
-        Sails().lift(sailsConfig, function(err, _sails) {
-            if (err) return done(err);
-            sails = _sails;
-            return done();
+        return new Promise((resolve, reject) => {
+        	/*
+        	* Ensures that a directory is empty. Deletes directory contents if the directory is not empty. 
+        	* If the directory does not exist, it is created. The directory itself is not deleted.
+        	*/
+        	fs.emptyDir(outputFolder, (err) => {
+        		if(err) {
+        			reject(err);
+        		} else {
+        			resolve();
+        		}
+        	})
+        }).then(() => {
+        	return new Promise((resolve, reject) => {
+        		Sails().lift(sailsConfig, (err, _sails) => {
+		            if (err) {
+		            	reject(err);
+		            } else {
+		            	sails = _sails;
+		            	resolve()
+		            }
+		        });
+        	})
         });
     });
 
@@ -83,33 +109,59 @@ describe('Sails Routes Swagger', function () {
         return done();
     });
 
-    it('should generate swagger doc on app lift', () => {
-    	let swaggerDoc = sails.hooks['sails-routes-swagger'];
-        
-        swaggerDoc.should.be.instanceof(Object);
-        should.exist(swaggerDoc.swagger);
-        should.exist(swaggerDoc.info);
-        should.exist(swaggerDoc.host);
-        should.exist(swaggerDoc.tags);
-        should.exist(swaggerDoc.definitions);
-        should.exist(swaggerDoc.securityDefinitions);
-        should.exist(swaggerDoc.externalDocs);
-        should.exist(swaggerDoc.paths);
-    });
-
-    it('should return swagger json', done => {
-    	request(sails.hooks.http.app)
-	      .get('/swagger/ui')
-	      .set('Accept', 'application/json')
-	      .expect('Content-Type', /json/)
-	      .expect(200, done);
-    });
-
-    it('should remove all "swagger" properties from routes objects', () => {
+    it.skip('should remove all "swagger" properties from routes objects', () => {
     	let routes = sails.config.routes;
     	Object.keys(routes).forEach(path => {
     		should.not.exist(routes[path].swagger);
     	});
+    });
+
+    context('Project Docs', () => {
+    	let allJSONPath 	= path.resolve(outputFolder, 'all.json'),
+    		testJSONPath 	= path.resolve(outputFolder, 'test.json'),
+    		swagerUrl 		= '/swagger/ui/';
+
+    	it('should create all.json & test.json', () => {
+    		let stats = fs.statSync(allJSONPath);
+
+    		stats.isFile().should.be.true;
+
+    		stats = fs.statSync(testJSONPath);
+
+    		stats.isFile().should.be.true;
+	    });	
+
+	    it('should return all.json', done => {
+	    	request(sails.hooks.http.app)
+	      		.get(swagerUrl + 'all')
+	      		.set('Accept', 'application/json')
+	      		.expect('Content-Type', /json/)
+	      		.expect(resp => {
+	      			JSON.stringify(resp.body).should.equal(
+	      				JSON.stringify(JSON.parse(fs.readFileSync(allJSONPath).toString('utf8')))
+	      			)
+	      		})
+	      		.expect(200, done);
+	    });	
+
+	    it('should return test.json', done => {
+	    	request(sails.hooks.http.app)
+	      		.get(swagerUrl + 'test')
+	      		.set('Accept', 'application/json')
+	      		.expect('Content-Type', /json/)
+	      		.expect(resp => {
+	      			JSON.stringify(resp.body).should.equal(
+	      				JSON.stringify(JSON.parse(fs.readFileSync(testJSONPath).toString('utf8')))
+	      			)
+	      		})
+	      		.expect(200, done)
+	    });	
+
+	    it('should return 404 if file not exists', done => {
+	    	request(sails.hooks.http.app)
+	      		.get(swagerUrl + 'unknown')
+	      		.expect(404, done)
+	    });
     });
 
     context('Doc Generator', () => {
@@ -118,6 +170,7 @@ describe('Sails Routes Swagger', function () {
 
     		let swaggerPathObj = {
   				tags: ['Test'],
+  				project: 'TestProjectName',
 		        summary: 'Some Test Summary',
 		        description: 'Some Test Description',
 		        operationId: 'addPet',
@@ -199,6 +252,23 @@ describe('Sails Routes Swagger', function () {
     			should.exist(path.tags);
     			path.tags.length.should.equal(1);
     			path.tags[0].should.equal('TestController');
+    		});
+
+    		it('should generate pathsObject for specified project name', () => {
+    			let projectName = 'TestProjectName';
+
+    			let result = docGen.generateSwaggerPathObjects(testRoute, projectName);
+
+    			should.exist(result);
+    			should.exist(result.paths);
+    			should.exist(result.tags);
+
+    			result.tags.length.should.equal(0);
+
+    			should.exist(result.paths['/api/test/{id}']);
+
+    			let path = result.paths['/api/test/{id}'].post;
+    			should.exist(path);
     		});
     	});
 

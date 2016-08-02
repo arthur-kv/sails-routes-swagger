@@ -27,7 +27,7 @@ module.exports = function sailsRoutesSwagger (sails) {
                     definitions 	 	: swaggerConfig.definitions || {},
                     securityDefinitions : swaggerConfig.securityDefinitions || {},
                     paths 				: pathResults.paths,
-                    externalDocs 		: swaggerConfig.externalDocs
+                    externalDocs 		: swaggerConfig.externalDocs || { url: DEFAULT_HOST }
                 };
 
                 /*

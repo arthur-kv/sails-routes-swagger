@@ -34,7 +34,8 @@ const customRoutes = {
                 }
             }
         }
-    }
+    },
+    'post /api/test': 'TestController.save'
 }
 
 
@@ -104,36 +105,45 @@ describe('Sails Routes Swagger', function () {
 	      .expect(200, done);
     });
 
+    it('should remove all "swagger" properties from routes objects', () => {
+    	let routes = sails.config.routes;
+    	Object.keys(routes).forEach(path => {
+    		should.not.exist(routes[path].swagger);
+    	});
+    });
+
     context('Doc Generator', () => {
 
     	context('generateSwaggerPathObjects', () => {
+
+    		let swaggerPathObj = {
+  				tags: ['Test'],
+		        summary: 'Some Test Summary',
+		        description: 'Some Test Description',
+		        operationId: 'addPet',
+		        consumes: ['application/json'],
+		        produces: ['application/json'],
+		        parameters: [{
+					name 			: 'id',
+					in 				: 'path',
+					description 	: 'ID of pet to return',
+					required 		: true,
+					type 			: 'integer',
+					format 			: 'int64'
+				}],
+		        responses: {
+		            405: {
+		                description: "Invalid input",
+		                schema: {}
+		            }
+		        }
+   			};
 
     		let testRoute = {
     			'post /api/test/:id': {
     				controller: 'TestController',
     				action: 'save',
-    				swagger: {
-    					tags: ['Test'],
-				           summary: 'Some Test Summary',
-				           description: 'Some Test Description',
-				           operationId: 'addPet',
-				           consumes: ['application/json'],
-				           produces: ['application/json'],
-				           parameters: [{
-							name 			: 'id',
-							in 				: 'path',
-							description 	: 'ID of pet to return',
-							required 		: true,
-							type 			: 'integer',
-							format 			: 'int64'
-						}],
-				        responses: {
-				            405: {
-				                description: "Invalid input",
-				                schema: {}
-				            }
-				        }
-    				}
+    				swagger: swaggerPathObj
     			}
     		};
 
@@ -169,6 +179,7 @@ describe('Sails Routes Swagger', function () {
     		});
 
     		it('should create tag name', () => {
+    			testRoute['post /api/test/:id'].swagger = swaggerPathObj;
     			delete testRoute['post /api/test/:id'].swagger.tags;
 
     			let result = docGen.generateSwaggerPathObjects(testRoute);

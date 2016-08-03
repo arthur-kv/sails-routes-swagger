@@ -19,7 +19,7 @@ module.exports = function sailsRoutesSwagger (sails) {
 
         	configKey = this.configKey;
 
-        	let _log = sails.log.verbose.bind(null, `${configKey}`);
+        	let _log = sails.log.verbose.bind(null, `"${configKey}"`);
 
             sails.after('router:after', () => {
                 let swaggerConfig = sails.config[this.configKey];

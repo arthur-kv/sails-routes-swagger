@@ -21,41 +21,39 @@ module.exports = function sailsRoutesSwagger (sails) {
 
         	let _log = sails.log.verbose.bind(null, `"${configKey}"`);
 
-            sails.after('router:after', () => {
-                let swaggerConfig = sails.config[this.configKey];
+            let swaggerConfig = sails.config[this.configKey];
 
-                let projectDocs = {
-                	all: generateSwaggerDoc(sails.config.routes, swaggerConfig)
-                };
+            let projectDocs = {
+            	all: generateSwaggerDoc(sails.config.routes, swaggerConfig)
+            };
 
-                _log('Generated swagger json for the whole project');
+            _log('Generated swagger json for the whole project');
 
-                if (swaggerConfig.projects && swaggerConfig.projects.length) {
-                	swaggerConfig.projects.reduce((docs, projectConfig) => {
-                		docs[projectConfig.name] = generateSwaggerDoc(sails.config.routes, swaggerConfig, projectConfig)
-                		_log(`Generated swagger json for "${projectConfig.name}" subproject`);
-                		return docs;
-                	}, projectDocs);
-                }
+            if (swaggerConfig.projects && swaggerConfig.projects.length) {
+            	swaggerConfig.projects.reduce((docs, projectConfig) => {
+            		docs[projectConfig.name] = generateSwaggerDoc(sails.config.routes, swaggerConfig, projectConfig)
+            		_log(`Generated swagger json for "${projectConfig.name}" subproject`);
+            		return docs;
+            	}, projectDocs);
+            }
 
-                _log('Validating generated swagger docs');
+            _log('Validating generated swagger docs');
 
-                Promise.all(
-                	Object.keys(projectDocs).map(prKey => {
-                		return validateSwaggerDoc(projectDocs[prKey])
-                	})
-                ).then(() => {
-                	if(swaggerConfig.docsFolder) {
-                		_log('Writing json files');
-                		return writeSwaggerDocs(_log, projectDocs, swaggerConfig.docsFolder);
-                	}
-                }).catch(err => {
-                	sails.log.error(err);
-                	throw err;
-                });
+            Promise.all(
+            	Object.keys(projectDocs).map(prKey => {
+            		return validateSwaggerDoc(projectDocs[prKey])
+            	})
+            ).then(() => {
+            	if(swaggerConfig.docsFolder) {
+            		_log('Writing json files');
+            		return writeSwaggerDocs(_log, projectDocs, swaggerConfig.docsFolder);
+            	}
+            }).then(() => {
+            	cb();
+            }).catch(err => {
+            	sails.log.error(err);
+            	throw err;
             });
-
-            cb();
         },
         routes: {
             after: {

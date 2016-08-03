@@ -231,32 +231,8 @@ describe('Sails Routes Swagger', function () {
     			Object.keys(result.paths).length.should.equal(0);
     		});
 
-    		it('should create tag name', () => {
-    			testRoute['post /api/test/:id'].swagger = swaggerPathObj;
-    			delete testRoute['post /api/test/:id'].swagger.tags;
-
-    			let result = docGen.generateSwaggerPathObjects(testRoute);
-
-    			should.exist(result);
-    			should.exist(result.paths);
-    			should.exist(result.tags);
-
-    			result.tags.length.should.equal(1);
-    			result.tags[0].name.should.equal('TestController');
-    			result.tags[0].description.should.equal('TestController');
-
-    			should.exist(result.paths['/api/test/{id}']);
-
-    			let path = result.paths['/api/test/{id}'].post;
-    			should.exist(path);
-    			should.exist(path.tags);
-    			path.tags.length.should.equal(1);
-    			path.tags[0].should.equal('TestController');
-    		});
-
     		it('should generate pathsObject for specified project name', () => {
     			let projectName = 'TestProjectName';
-
     			let result = docGen.generateSwaggerPathObjects(testRoute, projectName);
 
     			should.exist(result);
@@ -269,6 +245,29 @@ describe('Sails Routes Swagger', function () {
 
     			let path = result.paths['/api/test/{id}'].post;
     			should.exist(path);
+    		});
+
+    		it('should create tag name', () => {
+    			testRoute['post /api/test/:id'].swagger = swaggerPathObj;
+    			delete testRoute['post /api/test/:id'].swagger.tags;
+
+    			let result = docGen.generateSwaggerPathObjects(testRoute);
+
+    			should.exist(result);
+    			should.exist(result.paths);
+    			should.exist(result.tags);
+
+    			result.tags.length.should.equal(1);
+    			result.tags[0].name.should.equal('TestController'.toLowerCase());
+    			result.tags[0].description.should.equal('TestController'.toLowerCase());
+
+    			should.exist(result.paths['/api/test/{id}']);
+
+    			let path = result.paths['/api/test/{id}'].post;
+    			should.exist(path);
+    			should.exist(path.tags);
+    			path.tags.length.should.equal(1);
+    			path.tags[0].should.equal('TestController'.toLowerCase());
     		});
     	});
 

@@ -110,6 +110,7 @@ function generateSwaggerDoc (routes, swaggerConfig, projectConfig) {
         host 			 	: swaggerConfig.host || DEFAULT_HOST,
         tags 			 	: docGen.mergeTags(swaggerConfig.tags || [], pathResults.tags),
         definitions 	 	: swaggerConfig.definitions || {}, // should I place definitions under project config either?
+        parameters 			: swaggerConfig.parameters || {},
         securityDefinitions : swaggerConfig.securityDefinitions || {},
         paths 				: pathResults.paths,
         externalDocs 		: swaggerConfig.externalDocs || { url: DEFAULT_HOST }
